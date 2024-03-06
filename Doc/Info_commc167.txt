@@ -1,0 +1,32 @@
+--------------------------------------------------------------------------------
+ 
+INFORMATION sur les Fonctions pour l'affichage sur console à partir du C167
+
+--------------------------------------------------------------------------------
+
+0) placer #include commc167.h dans le fichier avant utilisation des fonctions
+
+1) init_ASC0_384()   :
+	- initialisation de la communication série coté C167
+	- cette fonction doit toujours être appelée pour que les 3 autres fonctions
+	  qui suivent puissent marcher.
+
+2) putchar-console(c) : affiche le caratère c sur la console
+
+3) puts_console(str) : affiche la chaine de caractere str sur la console
+
+4) printf_entier_console("format", var) : 
+	- affiche un entier de taille 8 ou 16 bits non signe ou signe sur la console
+	- même principe de formatage que le printf classique, mais en plus réduit : 
+     		* tous les formats ne sont pas autorises, et 
+		* on ne peut utiliser qu'une seule variable
+		* le champ "format" n'accepte que des caracteres de formatage : aucun texte
+		  en vue d'un affichage ne doit y etre place (contrairement au printf classique)
+
+5) Pour voir l'effet de ces fonctions :
+	- ouvrir une fenetre de type terminal
+	- lancer la commande consolec167
+	- ceci est à faire avant de lancer les programmes de communications CAN
+	  pour que l'affichage soit "pret" à se faire avant qu'il ait quelque chose
+	  à afficher
+
