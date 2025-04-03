@@ -42,9 +42,9 @@
 // ---- Constantes spécialisees pour chaque Message Objet particulier ----------
 #define M01_CAN_ID		0x002 // Valeur de l'IDENTIFIFANT CAN choisi pour
 				      // Message Objet particulier (ex. : ici, MO n°1)
-#define M01_CAN_DIR_BIT		0  // "DIRECTION" du M0 : 
+#define M01_CAN_DIR_BIT		1  // "DIRECTION" du M0 : 
 										//		- RECEPTION : 0		EMISSION : 1		
-#define M01_CAN_DLC			0  // Nombre d'octets de DONNES dans la trame CAN
+#define M01_CAN_DLC			1  // Nombre d'octets de DONNES dans la trame CAN
 					   // (DLC : Data Lenght Code)
 
 
@@ -71,8 +71,10 @@
 void CAN_init()
 {
 	// Initialisation du module CAN
- 
+ 	init_can_16x(CAN_BAUDRATE,0,0,0);
 	// Initialisation des Messages Objets 
+	def_mo_16x(1,0,0x111,1,2,0,0);
+    def_mo_16x(2,0,0x555,0,2,0,0);
 	// - ces initialisations sont SPECIFIQUES a l'abonne considere
 	// - iL vaut mieux les placer dans le code de chaque abonne
 
@@ -91,14 +93,30 @@ void CAN_init()
 //		       	-1 si erreur 
 // -----------------------------------------------------------------------------
 
+
+
+
 int CAN_send(int NumMO, char *p, int size)
 {
+
+        /* Define message object: MO-number, xtd, id, dir, dlc, TXIE, RXIE 
+/* incan16x.c */
+
+
+ld_modata_16x(NumMO, p);
+        /* load data bytes of a message object (1..14) */
+/* rdm1516x.c */
+
+send_mo_16x(NumMO);
 
 return 1024 ;
 }
 
-
 // ------ La fonction  CAN_receive(int NumMO, char *p) -------------------------  
+//  
+// Recevoir une trame CAN de DONNEES via un MO : VERIFIE si une trame de DONNEES  
+// est arrivée, et si oui, retourne un pointeur sur les DONNEES recues. 
+// Attention cete fonc// ------ La fonction  CAN_receive(int NumMO, char *p) -------------------------  
 //  
 // Recevoir une trame CAN de DONNEES via un MO : VERIFIE si une trame de DONNEES  
 // est arrivée, et si oui, retourne un pointeur sur les DONNEES recues. 
@@ -110,51 +128,36 @@ return 1024 ;
 // 		       	-1 si erreur 
 // -----------------------------------------------------------------------------
 
+
+
 int CAN_receive(int NumMO, char *p)
-{
-
+{ 
+	while(check_mo_16x(NumMO)==0);
+	rd_modata_16x(NumMO, p);
+	
 return 1024 ;
 }
 
 
-// ------ La fonction  CAN_reqremote(int NumMO)  -------------------------------  
-//  
-// Emettre une trame CAN de REQUETTE via un MO : envoie une demande 
-// pour provoquer, chez un autre noeud CAN, une transmission automatique :
-//  - paramètres :  NumMO [in]:  numéro du message objet utilisé, 
-//  - valeur rendue :   1 si la transmission a été effectuée, 
-//		       	-1 si erreur 
-// REMARQUES :
-//  - Le MO doit être positioné en RECEPTION
-//  - un message "vide" doit être émis comme requête
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
-
-int CAN_reqremote(int NumMO)
+int main()
 {
+int data;
+		char message_recu[16];
 
-return 1024 ;
-}
+	CAN_init();
+	init_ASC0_384();
+	//CAN_send(1,"Z",1);
+	puts_console("coucou\n");
 
-
-// ------ CAN_setremote(int NumMO, char *p, int size)---------------------------  
-//  
-// Recevoir une trame CAN de REQUETTE via un MO : charge la donnee à émettre  
-// en transmission automatique quand une trame de requête arrivera
-//  - paramètres :	NumMO [in]: numéro du message objet utilisé, 
-//		    	p     [in]: pointe sur la donnée à envoyer,
-//		    	size  [in]: longueur du message (nbr d'octets de données) 
-//  - valeur rendue :   1 si le chargement a été effectué, 
-//		       	-1 si erreur 
-// REMARQUES :
-//  - Le MO doit être positionee en EMISSION
-// -----------------------------------------------------------------------------
-
-
-int CAN_setremote(int NumMO, char *p, int size)
+while(1)
 {
-
-return 1024 ;
+    data= CAN_receive(2,message_recu);
+	
+	message_recu[2]=0;
+	printf_entier_console("val:%s\n",message_recu);
 }
+return 0 ;
 
-
+}
